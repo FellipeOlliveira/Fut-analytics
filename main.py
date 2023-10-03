@@ -36,28 +36,27 @@ def telaInvisivel():
     return option
 #iniciando pagina
 def criandoPagina():
-#1°Variaveis de inicialização
+    #1°Variaveis de inicialização
     url = iniciando("url")
-    data = iniciando("dataFutura")
     driver = webdriver.Chrome() #passar parametro options=telaInvisivel()
 
     driver.get(url)
 
     return driver
 def caminhoDados():
+    data = iniciando("dataFutura")
 
     driver = criandoPagina()
     time.sleep(5)#pra ter ctz de q os dados foram devidamente carregados na pagina
 
     driver.find_element(By.XPATH,"/html/body/div[1]/div/div/div/div[2]/div/button[3]").click()
 
-
-#3°Passo : Simulando o Click de entrada na area desejada do site(times por data)
+    #3°Passo : Simulando o Click de entrada na area desejada do site(times por data)
     driver.find_element(By.CLASS_NAME,'ui-datepicker-trigger').click() #clicando no button data
+    #PAREI AQ
+    driver.find_element(By.__getattribute__(f'data-date="{data.day}"','a')).click()#isso aq ta errado, estou analisando pra saber como deve ficar
 
     time.sleep(2)
-
-    time.sleep(8)
     driver.quit()
 
 if __name__ == '__main__':
