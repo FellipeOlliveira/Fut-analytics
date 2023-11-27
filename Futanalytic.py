@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from time import sleep as slp
 
 def caminho(liga):
+    games = []
+    contador = 1
     driver = webdriver.Chrome()
 
     driver.get("https://www.soccerstats.com/matches.asp?matchday=4")
@@ -15,12 +17,36 @@ def caminho(liga):
     except Exception as e:
         print("Ele n possui ads iniciais")
 
-    slp(0.5)
     table_game = encontrando_jogos(driver,liga)
 
     for i in table_game :
         driver.get("https://www.soccerstats.com/"+ i)
+        try:
+            try:
+                driver.find_element(By.XPATH,"//*[@id='dismiss-button']/div/span").click()
+            except Exception as e:
+                print("sem ads iniciais")
 
+
+            timeCasa = driver.find_element(By.XPATH,'//td/font/a[1]').text
+            timeFora = driver.find_element(By.XPATH,'//td/font/a[2]').text
+            partida = Partida(driver,liga,timeCasa,timeFora)
+            partida.homeAway = partida.requisito_Home_Away_Table(timeCasa,timeFora,driver)
+
+            driver.find_element(By.XPATH, '//table[4]/tbody/tr[6]/td/span/a[@class="myButton"]').click()
+
+            slp(3)
+            #partida.result = partida.requisito_Results_Table(timeCasa,timeFora,driver)
+            #partida.leading = partida.requisito_Leading_Table(timeCasa,timeFora,driver)
+            #partida.goalScorred = partida.requisito_Goal_Scorred(timeCasa,timeFora,driver)
+            #partida.stts = partida.requisitos_Stts_Times(timeCasa,timeFora,driver)
+
+            games.append(partida)
+            print(partida)
+
+        except Exception as e:
+            print("deu merda " , e)
+    print(len(games))
 
 #Retorna os links das partidas da liga
 def encontrando_jogos(driver,liga):
@@ -36,17 +62,32 @@ def encontrando_jogos(driver,liga):
     return tabela_resultado
 
 class Partida:
-    def __init__(self,driver,liga):
+    def __init__(self,driver,liga,casa,fora):
         self.driver = driver
         self.liga = liga
-        #self.timeCasa = driver.find_element(By.XPATH,'//td/font/a[1]').text
-        #self.timeFora = driver.find_element(By.XPATH,'//td/font/a[1]').text
+        self.casa = casa
+        self.fora = fora
 
+        self.homeAway = []
+        self.result = []
+        self.leading = []
+        self.goalScorred = []
+        self.stts = []
 
-    def macaco(self):
-        pass
+    def requisito_Home_Away_Table(self, casa, fora, driver):
+        # definições iniciais
+        resultado = []
+        valores = []
+        times = ["Casa", "Visitante"]
+        colunas = ["nome", "GP", "Pts"]
+
+        # coletando os dados do time casa
+        casa_content = driver.find_element(By.XPATH,
+                                           '//div[2]/table[1]/tbody/tr/td[1]/table/tbody/tr[2]/td/table/tbody/tr[@class="trow7"]').text
+        casa_content = casa_content.split()
+        resultado.append([casa,casa_content[-2],casa_content[-1]])
 
 
 if __name__ == '__main__':
-    liga = "Albania - Abissnet Superiore"
+    liga = "England - Premier League"
     caminho(liga)
